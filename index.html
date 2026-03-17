@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Felipe Restaurante | Painel Admin</title>
+  <style>
+    :root{
+      --bg:#0f1115;
+      --card:#1a1d24;
+      --gold:#d4af37;
+      --text:#ffffff;
+      --muted:#bdbdbd;
+      --border:#2a2f39;
+      --novo:#7a5c00;
+      --preparo:#004b6b;
+      --pronto:#1a5b1a;
+      --entregue:#555;
+      --danger:#ef4444;
+      --success:#16a34a;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    body{
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      padding:16px;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+    }
+
+    header{
+      text-align:center;
+      margin-bottom:18px;
+    }
+
+    header h1{
+      color:var(--gold);
+      margin-bottom:6px;
+      font-size:1.6rem;
+    }
+
+    header p{
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .tab-btn{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      background:#2d3340;
+      color:#fff;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .tab-btn.active{
+      background:var(--gold);
+      color:#111;
+    }
+
+    .panel{
+      display:none;
+    }
+
+    .panel.active{
+      display:block;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .top-actions button{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      font-weight:bold;
+      cursor:pointer;
+      background:var(--gold);
+      color:#111;
+    }
+
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .pedido{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .pedido h3{
+      color:var(--gold);
+      margin-bottom:8px;
+      font-size:1.05rem;
+    }
+
+    .status{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.75rem;
+      font-weight:bold;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    .status.novo{ background:var(--novo); color:#fff1b0; }
+    .status.preparo{ background:var(--preparo); color:#bdefff; }
+    .status.pronto{ background:var(--pronto); color:#caffca; }
+    .status.entregue{ background:var(--entregue); color:#eee; }
+
+    .info{
+      color:#ddd;
+      font-size:.92rem;
+      line-height:1.5;
+      margin-bottom:8px;
+    }
+
+    .itens{
+      background:#11141a;
+      border:1px solid #2a2f39;
+      border-radius:10px;
+      padding:10px;
+      margin-bottom:10px;
+      line-height:1.5;
+      color:#eee;
+      font-size:.92rem;
+    }
+
+    .acoes{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px;
+    }
+
+    .acoes button{
+      border:none;
+      border-radius:10px;
+      padding:10px;
+      cursor:pointer;
+      font-weight:bold;
+      background:#2d3340;
+      color:#fff;
+    }
+
+    .produto{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .produto h3{
+      color:var(--gold);
+      margin-bottom:8px;
+      font-size:1rem;
+    }
+
+    .produto p{
+      color:#ddd;
+      font-size:.9rem;
+      margin-bottom:8px;
+      line-height:1.4;
+    }
+
+    .produto .linha{
+      margin-bottom:8px;
+    }
+
+    .produto input, .produto select, .produto textarea{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid #3a404d;
+      background:#11141a;
+      color:#fff;
+      outline:none;
+      font-size:.95rem;
+    }
+
+    .produto-actions{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .produto-actions button{
+      border:none;
+      border-radius:10px;
+      padding:10px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .btn-save{ background:var(--success); color:white; }
+    .btn-remove{ background:var(--danger); color:white; }
+
+    .form-box{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:16px;
+    }
+
+    .form-box h2{
+      color:var(--gold);
+      font-size:1.1rem;
+      margin-bottom:12px;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:10px;
+    }
+
+    .form-grid input, .form-grid select, .form-grid textarea{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid #3a404d;
+      background:#11141a;
+      color:#fff;
+      outline:none;
+      font-size:.95rem;
+    }
+
+    .form-box button{
+      margin-top:12px;
+      border:none;
+      border-radius:10px;
+      padding:12px 14px;
+      font-weight:bold;
+      cursor:pointer;
+      background:var(--gold);
+      color:#111;
+      width:100%;
+    }
+
+    .vazio{
+      text-align:center;
+      color:#888;
+      margin-top:30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Painel Administrativo</h1>
+      <p>Felipe Restaurante — pedidos, preços e promoções</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="trocarAba('pedidos', this)">Pedidos</button>
+      <button class="tab-btn" onclick="trocarAba('cardapio', this)">Cardápio</button>
+    </div>
+
+    <div id="pedidos" class="panel active">
+      <div class="top-actions">
+        <button onclick="atualizarPedidos()">Atualizar pedidos</button>
+        <button onclick="limparPedidos()">Limpar pedidos demo</button>
+      </div>
+      <div id="listaPedidos" class="grid"></div>
+    </div>
+
+    <div id="cardapio" class="panel">
+      <div class="form-box">
+        <h2>Novo produto</h2>
+        <div class="form-grid">
+          <input id="novoNome" type="text" placeholder="Nome do produto" />
+          <input id="novaCategoria" type="text" placeholder="Categoria" />
+          <input id="novoPreco" type="number" step="0.01" placeholder="Preço normal" />
+          <input id="novoPromoPreco" type="number" step="0.01" placeholder="Preço promocional" />
+          <select id="novoPromoAtiva">
+            <option value="false">Sem promoção</option>
+            <option value="true">Promoção ativa</option>
+          </select>
+          <select id="novoDisponivel">
+            <option value="true">Disponível</option>
+            <option value="false">Indisponível</option>
+          </select>
+          <input id="novoEmoji" type="text" placeholder="Emoji (ex: 🍔)" />
+          <textarea id="novaDescricao" rows="2" placeholder="Descrição"></textarea>
+        </div>
+        <button onclick="adicionarProduto()">Adicionar produto</button>
+      </div>
+
+      <div class="top-actions">
+        <button onclick="renderProdutos()">Atualizar cardápio</button>
+        <button onclick="resetarProdutos()">Restaurar padrão</button>
+      </div>
+
+      <div id="listaProdutos" class="grid"></div>
+    </div>
+  </div>
+
+  <script>
+    const produtosPadrao = [
+      {
+        id: "1",
+        nome: "X-Burger",
+        descricao: "Pão, carne, queijo e salada.",
+        categoria: "Lanches",
+        preco: 18,
+        promocaoAtiva: false,
+        precoPromocional: 0,
+        disponivel: true,
+        emoji: "🍔"
+      },
+      {
+        id: "2",
+        nome: "X-Tudo",
+        descricao: "Completo com bacon, ovo e queijo.",
+        categoria: "Lanches",
+        preco: 25,
+        promocaoAtiva: true,
+        precoPromocional: 22,
+        disponivel: true,
+        emoji: "🍔"
+      },
+      {
+        id: "3",
+        nome: "Batata Frita",
+        descricao: "Porção crocante para compartilhar.",
+        categoria: "Porções",
+        preco: 20,
+        promocaoAtiva: false,
+        precoPromocional: 0,
+        disponivel: true,
+        emoji: "🍟"
+      },
+      {
+        id: "4",
+        nome: "Coca-Cola 350ml",
+        descricao: "Lata gelada.",
+        categoria: "Bebidas",
+        preco: 6,
+        promocaoAtiva: false,
+        precoPromocional: 0,
+        disponivel: true,
+        emoji: "🥤"
+      },
+      {
+        id: "5",
+        nome: "Suco Natural",
+        descricao: "Sabor do dia.",
+        categoria: "Bebidas",
+        preco: 8,
+        promocaoAtiva: true,
+        precoPromocional: 6.5,
+        disponivel: true,
+        emoji: "🍹"
+      }
+    ];
+
+    function obterProdutos() {
+      const produtos = JSON.parse(localStorage.getItem("felipe_produtos") || "null");
+      if (!produtos) {
+        localStorage.setItem("felipe_produtos", JSON.stringify(produtosPadrao));
+        return produtosPadrao;
+      }
+      return produtos;
+    }
+
+    function salvarProdutos(produtos) {
+      localStorage.setItem("felipe_produtos", JSON.stringify(produtos));
+    }
+
+    function obterPedidos() {
+      return JSON.parse(localStorage.getItem("felipe_pedidos") || "[]");
+    }
+
+    function salvarPedidos(pedidos) {
+      localStorage.setItem("felipe_pedidos", JSON.stringify(pedidos));
+    }
+
+    function trocarAba(id, btn) {
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+    }
+
+    function formatarPreco(valor) {
+      return `R$ ${Number(valor).toFixed(2).replace(".", ",")}`;
+    }
+
+    function atualizarPedidos() {
+      const lista = document.getElementById("listaPedidos");
+      const pedidos = obterPedidos();
+
+      if (pedidos.length === 0) {
+        lista.innerHTML = `<div class="vazio">Nenhum pedido recebido ainda.</div>`;
+        return;
+      }
+
+      lista.innerHTML = pedidos.map(pedido => `
+        <div class="pedido">
+          <h3>Mesa ${pedido.mesa}</h3>
+          <div class="status ${pedido.status}">${pedido.status}</div>
+          <div class="info">
+            <strong>Horário:</strong> ${pedido.horario}<br>
+            <strong>Total:</strong> ${formatarPreco(pedido.total)}<br>
+            <strong>Observação:</strong> ${pedido.observacao || "Sem observação"}
+          </div>
+
+          <div class="itens">
+            ${pedido.itens.map(item => `• ${item.nome} - ${formatarPreco(item.preco)}`).join("<br>")}
+          </div>
+
+          <div class="acoes">
+            <button onclick="mudarStatus('${pedido.id}', 'preparo')">Em preparo</button>
+            <button onclick="mudarStatus('${pedido.id}', 'pronto')">Pronto</button>
+            <button onclick="mudarStatus('${pedido.id}', 'entregue')">Entregue</button>
+            <button onclick="removerPedido('${pedido.id}')">Remover</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function mudarStatus(id, status) {
+      const pedidos = obterPedidos().map(p => p.id === id ? { ...p, status } : p);
+      salvarPedidos(pedidos);
+      atualizarPedidos();
+    }
+
+    function removerPedido(id) {
+      const pedidos = obterPedidos().filter(p => p.id !== id);
+      salvarPedidos(pedidos);
+      atualizarPedidos();
+    }
+
+    function limparPedidos() {
+      if (confirm("Deseja limpar os pedidos da demo?")) {
+        localStorage.removeItem("felipe_pedidos");
+        atualizarPedidos();
+      }
+    }
+
+    function renderProdutos() {
+      const lista = document.getElementById("listaProdutos");
+      const produtos = obterProdutos();
+
+      if (produtos.length === 0) {
+        lista.innerHTML = `<div class="vazio">Nenhum produto cadastrado.</div>`;
+        return;
+      }
+
+      lista.innerHTML = produtos.map(produto => `
+        <div class="produto">
+          <h3>${produto.nome}</h3>
+          <p>${produto.descricao}</p>
+
+          <div class="linha"><strong>Categoria:</strong> ${produto.categoria}</div>
+          <div class="linha"><strong>Preço normal:</strong> ${formatarPreco(produto.preco)}</div>
+          <div class="linha"><strong>Promoção:</strong> ${produto.promocaoAtiva ? "Ativa" : "Desligada"}</div>
+          <div class="linha"><strong>Preço promocional:</strong> ${produto.promocaoAtiva ? formatarPreco(produto.precoPromocional) : "-"}</div>
+          <div class="linha"><strong>Disponibilidade:</strong> ${produto.disponivel ? "Disponível" : "Indisponível"}</div>
+
+          <div class="form-grid" style="margin-top:12px;">
+            <input id="nome-${produto.id}" type="text" value="${produto.nome}" />
+            <input id="categoria-${produto.id}" type="text" value="${produto.categoria}" />
+            <input id="preco-${produto.id}" type="number" step="0.01" value="${produto.preco}" />
+            <input id="promoPreco-${produto.id}" type="number" step="0.01" value="${produto.precoPromocional}" />
+            <select id="promoAtiva-${produto.id}">
+              <option value="true" ${produto.promocaoAtiva ? "selected" : ""}>Promoção ativa</option>
+              <option value="false" ${!produto.promocaoAtiva ? "selected" : ""}>Sem promoção</option>
+            </select>
+            <select id="disponivel-${produto.id}">
+              <option value="true" ${produto.disponivel ? "selected" : ""}>Disponível</option>
+              <option value="false" ${!produto.disponivel ? "selected" : ""}>Indisponível</option>
+            </select>
+            <input id="emoji-${produto.id}" type="text" value="${produto.emoji || ''}" />
+            <textarea id="descricao-${produto.id}" rows="2">${produto.descricao}</textarea>
+          </div>
+
+          <div class="produto-actions">
+            <button class="btn-save" onclick="salvarEdicao('${produto.id}')">Salvar</button>
+            <button class="btn-remove" onclick="removerProduto('${produto.id}')">Remover</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function salvarEdicao(id) {
+      const produtos = obterProdutos().map(produto => {
+        if (produto.id !== id) return produto;
+
+        return {
+          ...produto,
+          nome: document.getElementById(`nome-${id}`).value.trim(),
+          categoria: document.getElementById(`categoria-${id}`).value.trim(),
+          preco: Number(document.getElementById(`preco-${id}`).value || 0),
+          precoPromocional: Number(document.getElementById(`promoPreco-${id}`).value || 0),
+          promocaoAtiva: document.getElementById(`promoAtiva-${id}`).value === "true",
+          disponivel: document.getElementById(`disponivel-${id}`).value === "true",
+          emoji: document.getElementById(`emoji-${id}`).value.trim(),
+          descricao: document.getElementById(`descricao-${id}`).value.trim()
+        };
+      });
+
+      salvarProdutos(produtos);
+      alert("Produto atualizado!");
+      renderProdutos();
+    }
+
+    function removerProduto(id) {
+      if (!confirm("Deseja remover este produto?")) return;
+      const produtos = obterProdutos().filter(p => p.id !== id);
+      salvarProdutos(produtos);
+      renderProdutos();
+    }
+
+    function adicionarProduto() {
+      const nome = document.getElementById("novoNome").value.trim();
+      const categoria = document.getElementById("novaCategoria").value.trim();
+      const preco = Number(document.getElementById("novoPreco").value || 0);
+      const precoPromocional = Number(document.getElementById("novoPromoPreco").value || 0);
+      const promocaoAtiva = document.getElementById("novoPromoAtiva").value === "true";
+      const disponivel = document.getElementById("novoDisponivel").value === "true";
+      const emoji = document.getElementById("novoEmoji").value.trim();
+      const descricao = document.getElementById("novaDescricao").value.trim();
+
+      if (!nome || !categoria || !preco) {
+        alert("Preencha nome, categoria e preço.");
+        return;
+      }
+
+      const produtos = obterProdutos();
+      produtos.push({
+        id: Date.now().toString(),
+        nome,
+        categoria,
+        preco,
+        precoPromocional,
+        promocaoAtiva,
+        disponivel,
+        emoji,
+        descricao
+      });
+
+      salvarProdutos(produtos);
+
+      document.getElementById("novoNome").value = "";
+      document.getElementById("novaCategoria").value = "";
+      document.getElementById("novoPreco").value = "";
+      document.getElementById("novoPromoPreco").value = "";
+      document.getElementById("novoPromoAtiva").value = "false";
+      document.getElementById("novoDisponivel").value = "true";
+      document.getElementById("novoEmoji").value = "";
+      document.getElementById("novaDescricao").value = "";
+
+      alert("Produto adicionado!");
+      renderProdutos();
+    }
+
+    function resetarProdutos() {
+      if (!confirm("Deseja restaurar os produtos padrão?")) return;
+      salvarProdutos(produtosPadrao);
+      renderProdutos();
+    }
+
+    atualizarPedidos();
+    renderProdutos();
+    setInterval(atualizarPedidos, 2000);
+  </script>
+</body>
+  </html>
